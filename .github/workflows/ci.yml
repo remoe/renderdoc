@@ -2,12 +2,8 @@ name: CI
 
 on:
   push:
-    branches:
-      - v1.x
-      - ci-test
-  pull_request:
-    branches:
-      - v1.x
+    tags:
+      - '*'
 
 defaults:
   run:
@@ -51,17 +47,12 @@ jobs:
         zip -r "${FNAME}" build/bin
         ls -lh "${FNAME}"
         echo "FNAME=$FNAME" >> $GITHUB_ENV
-    - name: Bump version and push tag/create release point
-      uses: anothrNick/github-tag-action@1.17.2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        WITH_V: true
-      id: bump_version
-    - name: Upload binary to release
-      uses: svenstaro/upload-release-action@v1-release
+    - name: Upload binaries to release
+      uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
         file: RenderDoc_macOS.zip
         asset_name: RenderDoc_macOS.zip
-        tag: ${{ steps.bump_version.outputs.new_tag }}
+        tag: ${{ github.ref }}
         overwrite: true
+        body: "RenderDoc MacOSX"
