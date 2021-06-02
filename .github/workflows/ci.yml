@@ -51,9 +51,17 @@ jobs:
         zip -r "${FNAME}" build/bin
         ls -lh "${FNAME}"
         echo "FNAME=$FNAME" >> $GITHUB_ENV
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: RenderDoc_macOS.zip
+    - name: Bump version and push tag/create release point
+      uses: anothrNick/github-tag-action@1.17.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        WITH_V: true
+      id: bump_version
+    - name: Upload binary to release
+      uses: svenstaro/upload-release-action@v1-release
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: RenderDoc_macOS.zip
+        asset_name: RenderDoc_macOS.zip
+        tag: ${{ steps.bump_version.outputs.new_tag }}
+        overwrite: true
